@@ -1,0 +1,61 @@
+<html>
+	<head>
+		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+		<script src="https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<script src="bower_components/file-saver.js/FileSaver.js"></script>
+		<script src="http://yamltojson.com/js/yaml.js"></script>
+		<script src="configurator.js"></script>
+		<style type="text/css">
+			#code {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 50px;
+				left: 0;
+			}
+			body {
+				padding-top: 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<span class="navbar-brand">clang-format configurator</span>
+				</div>
+				<div class="navbar-form">
+					<span class="navbar-right">
+						<button
+							class="btn btn-default"
+							id="update_button"
+						>
+							<i class="fa fa-refresh fa-fw"></i> Update!
+						</button>
+						<button
+							class="btn btn-default"
+							id="save_button"
+						>
+							<i class="fa fa-download fa-fw"></i> Save
+						</button>
+					</span>
+				</div>
+			</div>
+		</nav>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-6" style="padding-top: 10px; word-wrap: break-word;">
+					<form class="form-horizontal" id="options">
+					</form>
+				</div>
+				<div class="col-sm-6" style="position: fixed; right: 0; height: 100%;">
+					<div id="code"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

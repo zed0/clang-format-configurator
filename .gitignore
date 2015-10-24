@@ -1,0 +1,5 @@
+jail*
+*.swp
+server/node_modules*
+client/bower_components*
+llvm/*
