@@ -4,6 +4,7 @@ var body_parser   = require('body-parser');
 var child_process = require('child_process');
 var userid        = require('userid');
 var path          = require('path');
+var fs            = require('fs');
 
 var app = express();
 
@@ -77,12 +78,12 @@ function run_firejail_process(program, args){
 
 function start_firejail_process(){
 	var options = [
-		//'--quiet',
+		'--quiet',
 		'--private=' + clang_base,
 		'--net=none',
 		'--shell=none',
 		'--caps.drop=all',
-		//'--blacklist=/',
+		'--blacklist=/',
 		'--name=configurator',
 		'--',
 		'sleep',
