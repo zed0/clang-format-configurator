@@ -1,70 +1,3 @@
-var clang_options = {
-	BasedOnStyle:                                   ['LLVM', 'Google', 'Chromium', 'Mozilla', 'WebKit'],
-	Language:                                       ['Cpp', 'Java', 'JavaScript', 'Proto'],
-	AccessModifierOffset:                           'int',
-	AlignAfterOpenBracket:                          'bool',
-	AlignConsecutiveAssignments:                    'bool',
-	AlignEscapedNewlinesLeft:                       'bool',
-	AlignOperands:                                  'bool',
-	AlignTrailingComments:                          'bool',
-	AllowAllParametersOfDeclarationOnNextLine:      'bool',
-	AllowShortBlocksOnASingleLine:                  'bool',
-	AllowShortCaseLabelsOnASingleLine:              'bool',
-	AllowShortFunctionsOnASingleLine:               ['None', 'Empty', 'Inline', 'All'],
-	AllowShortIfStatementsOnASingleLine:            'bool',
-	AllowShortLoopsOnASingleLine:                   'bool',
-	AlwaysBreakAfterDefinitionReturnType:           ['None', 'All', 'TopLevel'],
-	AlwaysBreakBeforeMultilineStrings:              'bool',
-	AlwaysBreakTemplateDeclarations:                'bool',
-	BinPackArguments:                               'bool',
-	BinPackParameters:                              'bool',
-	BreakBeforeBinaryOperators:                     ['None', 'NonAssignment', 'All'],
-	BreakBeforeBraces:                              ['Attach', 'Linux', 'Mozilla', 'Stroustrup', 'Allman', 'GNU'],
-	BreakBeforeTernaryOperators:                    'bool',
-	BreakConstructorInitializersBeforeComma:        'bool',
-	ColumnLimit:                                    'unsigned',
-	CommentPragmas:                                 'string',
-	ConstructorInitializerAllOnOneLineOrOnePerLine: 'bool',
-	ConstructorInitializerIndentWidth:              'unsigned',
-	ContinuationIndentWidth:                        'unsigned',
-	Cpp11BracedListStyle:                           'bool',
-	DerivePointerAlignment:                         'bool',
-	DisableFormat:                                  'bool',
-	ExperimentalAutoDetectBinPacking:               'bool',
-	//ForEachMacros:                                  [ 'foreach', 'Q_FOREACH', 'BOOST_FOREACH' ],
-	IndentCaseLabels:                               'bool',
-	IndentWidth:                                    'unsigned',
-	IndentWrappedFunctionNames:                     'bool',
-	KeepEmptyLinesAtTheStartOfBlocks:               'bool',
-	MacroBlockBegin:                                'string',
-	MacroBlockEnd:                                  'string',
-	MaxEmptyLinesToKeep:                            'unsigned',
-	NamespaceIndentation:                           ['None', 'Inner', 'All'],
-	ObjCBlockIndentWidth:                           'unsigned',
-	ObjCSpaceAfterProperty:                         'bool',
-	ObjCSpaceBeforeProtocolList:                    'bool',
-	PenaltyBreakBeforeFirstCallParameter:           'unsigned',
-	PenaltyBreakComment:                            'unsigned',
-	PenaltyBreakFirstLessLess:                      'unsigned',
-	PenaltyBreakString:                             'unsigned',
-	PenaltyExcessCharacter:                         'unsigned',
-	PenaltyReturnTypeOnItsOwnLine:                  'unsigned',
-	PointerAlignment:                               ['Left', 'Right', 'Middle'],
-	SpaceAfterCStyleCast:                           'bool',
-	SpaceBeforeAssignmentOperators:                 'bool',
-	SpaceBeforeParens:                              ['Never', 'ControlStatements', 'Always'],
-	SpaceInEmptyParentheses:                        'bool',
-	SpacesBeforeTrailingComments:                   'unsigned',
-	SpacesInAngles:                                 'bool',
-	SpacesInContainerLiterals:                      'bool',
-	SpacesInCStyleCastParentheses:                  'bool',
-	SpacesInParentheses:                            'bool',
-	SpacesInSquareBrackets:                         'bool',
-	Standard:                                       ['Cpp03', 'Cpp11', 'Auto'],
-	TabWidth:                                       'unsigned',
-	UseTab:                                         ['Never', 'ForIndentation', 'Always']
-}
-
 var example =
 	'#include <iostream>\n' +
 	'#include <algorithm>\n' +
@@ -112,12 +45,24 @@ var example =
 	'}\n';
 
 var code;
+var clang_options;
 
 $(document).ready(function(){
+	$.ajax({
+		url: 'http://uwcs.co.uk:8038/doc',
+		type: 'GET',
+		dataType: 'json',
+		crossDomain: true,
+		success: create_inputs,
+		error: function(err){
+			console.log(err);
+		}
+	});
+
 	code = ace.edit('code');
 	code.setTheme('ace/theme/twilight');
 	code.getSession().setMode('ace/mode/c_cpp');
-	code.getSession().setUseSoftTabs(true);
+	code.getSession().setUseSoftTabs(false);
 	code.getSession().setTabSize(2);
 	code.getSession().setUseWrapMode(false);
 	code.setOption('showInvisibles', true);
@@ -125,12 +70,8 @@ $(document).ready(function(){
 	code.$blockScrolling = Infinity;
 	code.getSession().setValue(example);
 
-	create_inputs(clang_options);
 
 	$('#update_button').on('click', function(evt){
-		request_update(clang_options);
-	});
-	$('.form-control').on('change', function(evt){
 		request_update(clang_options);
 	});
 	$('#save_button').on('click', function(evt){
@@ -159,7 +100,7 @@ function request_update(clang_options){
 		options.range = range.start.row + ':' + range.end.row;
 
 	$.ajax({
-		url: 'http://uwcs.co.uk:8038/',
+		url: 'http://uwcs.co.uk:8038/format',
 		type: 'POST',
 		dataType: 'json',
 		crossDomain: true,
@@ -189,55 +130,76 @@ function get_config(options){
 }
 
 function create_inputs(options){
+	clang_options = options;
 	var container = $('#options');
 
 	$.each(options, function(key, value){
-		var input;
-		if($.isArray(value))
-			input = select_input(key, ['Default'].concat(value));
-		else if(value === 'bool')
-			input = select_input(key, ['Default', true, false]);
-		else if(value === 'string')
-			input = string_input(key);
-		else if(value === 'int')
-			input = int_input(key);
-		else if(value === 'unsigned')
-			input = int_input(key, 0);
-		else
-			console.log('No input created for type: ' + value);
-
+		var input = create_input(key, value);
 		$(input).appendTo(container);
+	});
+
+	$('.form-control').on('change', function(evt){
+		request_update(clang_options);
 	});
 }
 
-function select_input(option_name, options){
+function create_input(option_name, option_details){
+	var input_template;
+	if($.isArray(option_details.options))
+		input_template = select_input(option_name, ['Default'].concat(option_details.options));
+	else if(option_details.type === 'bool')
+		input_template = select_input(option_name, ['Default', true, false]);
+	else if(option_details.type === 'std::string' || option_details.type === 'string')
+		input_template = string_input(option_name);
+	else if(option_details.type === 'std::vector<std::string>')
+		input_template = string_input(option_name);
+	else if(option_details.type === 'int')
+		input_template = int_input(option_name);
+	else if(option_details.type === 'unsigned')
+		input_template = int_input(option_name, 0);
+	else
+	{
+		console.log('No input created for ' + option_name + ' (type: ' + option_details.type + ')');
+	}
+
 	var template =
 		'<div class="form-group">' +
-		'	<label class="col-sm-8"><%= option_name %>:</label>' +
+		'	<label class="col-sm-8">' +
+		'		<a href="#<%= option_name %>_collapse" data-toggle="collapse"><i class="fa fa-info-circle"></i></a>' +
+		'		<%= option_name %>:' +
+		'	</label>' +
 		'	<div class="col-sm-4">' +
-		'		<select id="<%= option_name %>" class="form-control">' +
-		'			<% _.forEach(options, function(option){%>' +
-		'				<option value="<%= option %>"><%= option %></option>' +
-		'			<%});%>' +
-		'		</select>' +
+		input_template +
+		'	</div>' +
+		'</div>' +
+		'<div class="collapse" id="<%= option_name %>_collapse">' +
+		'	<div class="well">' +
+		'		<%= option_doc %>' +
 		'	</div>' +
 		'</div>';
 
 	return _.template(template)({
 		option_name: option_name,
-		options: options
+		option_doc:  option_details.doc
+	});
+}
+
+function select_input(option_name, options){
+	var template =
+		'		<select id="<%= option_name %>" class="form-control">' +
+		'			<% _.forEach(options, function(option){%>' +
+		'				<option value="<%= option %>"><%= option %></option>' +
+		'			<%});%>' +
+		'		</select>';
+	return _.template(template)({
+		option_name: option_name,
+		options:     options
 	});
 }
 
 function string_input(option_name){
 	var template =
-		'<div class="form-group">' +
-		'	<label class="col-sm-8"><%= option_name %>:</label>' +
-		'	<div class="col-sm-4">' +
-		'		<input type="text" class="form-control" id="<%= option_name %>" placeholder="Default"/>' +
-		'	</div>' +
-		'</div>';
-
+		'<input type="text" class="form-control" id="<%= option_name %>" placeholder="Default"/>';
 	return _.template(template)({
 		option_name: option_name
 	});
@@ -245,15 +207,10 @@ function string_input(option_name){
 
 function int_input(option_name, min){
 	var template =
-		'<div class="form-group">' +
-		'	<label class="col-sm-8"><%= option_name %>:</label>' +
-		'	<div class="col-sm-4">' +
-		'		<input type="number" class="form-control" id="<%= option_name %>" placeholder="Default" min="<%= min %>" />' +
-		'	</div>' +
-		'</div>';
+		'<input type="number" class="form-control" id="<%= option_name %>" placeholder="Default" min="<%= min %>" />';
 
 	return _.template(template)({
 		option_name: option_name,
-		min: min
+		min:         min
 	});
 }

@@ -9,8 +9,6 @@ then
 	ln $( which node )
 fi
 
-touch foo
-
 firejail \
 	--private=$( pwd ) \
 	--private-bin=true \
