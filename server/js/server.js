@@ -9,15 +9,13 @@ var marked        = require('marked');
 
 setup_marked();
 
-var app = express();
-
-//var firejail_path = '/usr/bin/firejail';
-var clang_base    = path.resolve(__dirname, '../llvm');
-
-app.use(body_parser.json());
-app.use(body_parser.urlencoded({extended: true}));
+var clang_base = path.resolve(__dirname, '../llvm');
 
 var option_documentation = parse_documentation();
+
+var app = express();
+app.use(body_parser.json());
+app.use(body_parser.urlencoded({extended: true}));
 
 app.post('/format', function(req, res){
 	res.header("Access-Control-Allow-Origin", "http://zed0.co.uk");
@@ -31,15 +29,8 @@ app.get('/doc', function(req, res){
 	get_documentation(req, res);
 });
 
-/*
-var firejail_proc = start_firejail_process();
-process.on('SIGINT', function(){
-	stop_firejail_process(firejail_proc);
-	process.exit();
-});
-*/
-
 app.listen(8038);
+
 
 function run_clang_format(code, config, range, res){
 	var proc = clang_format_process(config, range);
@@ -75,56 +66,6 @@ function run_process(program, args){
 	);
 }
 
-function run_firejail_process(program, args){
-	var options = [
-		'--join=' + firejail_proc,
-		'--'
-	];
-	options.push(program);
-	return child_process.spawn(
-		firejail_path,
-		options.concat(args)
-	);
-}
-
-function start_firejail_process(){
-	var options = [
-		'--quiet',
-		'--private=' + clang_base,
-		'--net=none',
-		'--shell=none',
-		'--caps.drop=all',
-		'--blacklist=/',
-		'--name=configurator',
-		'--',
-		'sleep',
-		'inf'
-	];
-	console.log('[daemon]: starting firejail...');
-	var daemon = child_process.spawn(
-		firejail_path,
-		options
-	);
-	daemon.stderr.on('data', function(data){
-		console.log('[daemon]: ' + data.toString('utf8'));
-	});
-	daemon.stdout.on('data', function(data){
-		console.log('[daemon]: ' + data.toString('utf8'));
-	});
-	console.log('[daemon]: started with pid: ' + daemon.pid);
-	return daemon.pid;
-}
-
-function stop_firejail_process(pid){
-	var options = [
-		'--shutdown=' + pid
-	];
-	return child_process.spawn(
-		firejail_path,
-		options
-	);
-}
-
 function clang_format_process(config, range){
 	var clang_version = '3.7.0';
 	var clang_path    = clang_version + '/bin/clang-format'
@@ -136,7 +77,6 @@ function clang_format_process(config, range){
 		options.push('-lines=' + range);
 
 	return run_process(clang_base + '/' + clang_path, options);
-	//return run_firejail_process(clang_path, options);
 }
 
 function get_documentation(req, res){
@@ -232,5 +172,5 @@ function setup_marked(){
 	//Allow code in the format: \code\nfoo\nbar\nbaz\n\endcode
 	marked.Lexer.rules.tables.fences    = /^ *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\1|\\endcode) *(?:\n+|$)/;
 	//Add above code syntax to stuff to skip in paragraphs
-	marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?! *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\2|\\endcode) *(?:\n+|$)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/
+	marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?! *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\2|\\endcode) *(?:\n+|$)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/;
 }
