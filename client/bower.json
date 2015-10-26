@@ -1,0 +1,26 @@
+{
+  "name": "clang-format-configurator",
+  "version": "0.0.1",
+  "authors": [
+    "Ben Falconer <ben@falconers.me.uk>"
+  ],
+  "description": "Interactively view changes in clang-format configuration",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "clang"
+  ],
+  "license": "MIT",
+  "homepage": "http://zed0.co.uk/clang-format-configurator",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "file-saver.js": "~1.20150507.2"
+  }
+}

@@ -1,6 +1,5 @@
 *.swp
 server/js/node_modules*
-server/llvm/*
 server/node
 server/.*
 client/bower_components*
