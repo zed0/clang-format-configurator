@@ -9,6 +9,8 @@ var marked        = require('marked');
 
 setup_marked();
 
+var clang_version = '3.7.0';
+
 var clang_base = path.resolve(__dirname, '../llvm');
 
 var option_documentation = parse_documentation();
@@ -67,7 +69,6 @@ function run_process(program, args){
 }
 
 function clang_format_process(config, range){
-	var clang_version = '3.7.0';
 	var clang_path    = clang_version + '/bin/clang-format'
 	var options       = [];
 
@@ -92,7 +93,6 @@ function get_documentation(req, res){
 }
 
 function parse_documentation(){
-	var clang_version = '3.7.0';
 	var result = fs.readFileSync(
 		'llvm/' + clang_version + '.src/docs/ClangFormatStyleOptions.rst',
 		{
