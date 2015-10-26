@@ -7,15 +7,7 @@ var path          = require('path');
 var fs            = require('fs');
 var marked        = require('marked');
 
-marked.InlineLexer.breaks = new marked.InlineLexer([]);
-marked.InlineLexer.breaks.rules.text   = /^[\s\S]+?(?=[\\<!\[_*`:]| {2,}\n|$)/,
-
-marked.InlineLexer.breaks.rules.link   = /^`((?:[^`<]|\n)*)[\s\S]<([^>]*)>`_/;
-marked.InlineLexer.breaks.rules.strong = /^:\w*:`([\w\-]*?)`|^\*\*([\s\S]+?)\*\*(?!\*)/;
-marked.InlineLexer.breaks.rules.code   = /^(``+)\s*([\s\S]*?[^`])\s*\1(?!`)/;
-
-marked.Lexer.rules.tables.fences    = /^ *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\1|\\endcode) *(?:\n+|$)/;
-marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?! *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\2|\\endcode) *(?:\n+|$)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/
+setup_marked();
 
 var app = express();
 
@@ -223,4 +215,22 @@ function get_select_options(name, doc){
 		result.push(splits[i]);
 
 	return result;
+}
+
+function setup_marked(){
+	marked.InlineLexer.breaks = new marked.InlineLexer([]);
+
+	//Allow Links in the format: `Foo bar baz <http://foo.bar/baz>`_
+	marked.InlineLexer.breaks.rules.link   = /^`((?:[^`<]|\n)*)[\s\S]<([^>]*)>`_/;
+	//Allow bold in the format: :program:`foo-bar`
+	marked.InlineLexer.breaks.rules.strong = /^:\w*:`([\w\-]*?)`|^\*\*([\s\S]+?)\*\*(?!\*)/;
+	//Add : to the list of potential special characters in text:
+	marked.InlineLexer.breaks.rules.text   = /^[\s\S]+?(?=[\\<!\[_*`:]| {2,}\n|$)/,
+	//Enforce code having at least two backticks around it:
+	marked.InlineLexer.breaks.rules.code   = /^(``+)\s*([\s\S]*?[^`])\s*\1(?!`)/;
+
+	//Allow code in the format: \code\nfoo\nbar\nbaz\n\endcode
+	marked.Lexer.rules.tables.fences    = /^ *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\1|\\endcode) *(?:\n+|$)/;
+	//Add above code syntax to stuff to skip in paragraphs
+	marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?! *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\2|\\endcode) *(?:\n+|$)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/
 }
