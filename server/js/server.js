@@ -9,11 +9,15 @@ var marked        = require('marked');
 
 setup_marked();
 
-var clang_version = '3.7.0';
+var clang_versions = ['3.7.0', '3.6.2', '3.6.1', '3.6.0', '3.5.2', '3.5.0'];
 
 var clang_base = path.resolve(__dirname, '../llvm');
 
-var option_documentation = parse_documentation();
+var option_documentation = {};
+option_documentation.versions = clang_versions;
+clang_versions.forEach(function(version){
+	option_documentation[version] = parse_documentation(version);
+});
 
 var app = express();
 app.use(body_parser.json());
@@ -22,7 +26,7 @@ app.use(body_parser.urlencoded({extended: true}));
 app.post('/format', function(req, res){
 	res.header("Access-Control-Allow-Origin", "http://zed0.co.uk");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	run_clang_format(req.body.code, req.body.config, req.body.range, res);
+	run_clang_format(req.body.version, req.body.code, req.body.config, req.body.range, res);
 });
 
 app.get('/doc', function(req, res){
@@ -34,8 +38,8 @@ app.get('/doc', function(req, res){
 app.listen(8038);
 
 
-function run_clang_format(code, config, range, res){
-	var proc = clang_format_process(config, range);
+function run_clang_format(clang_version, code, config, range, res){
+	var proc = clang_format_process(clang_version, config, range);
 	var output = '';
 
 	proc.stdout.on('data', function(data){
@@ -68,7 +72,7 @@ function run_process(program, args){
 	);
 }
 
-function clang_format_process(config, range){
+function clang_format_process(clang_version, config, range){
 	var clang_path    = clang_version + '/bin/clang-format'
 	var options       = [];
 
@@ -83,8 +87,8 @@ function clang_format_process(config, range){
 function get_documentation(req, res){
 	if(req.query.option)
 	{
-		if(option_documentation[req.query.option])
-			res.jsonp(option_documentation[req.query.option]);
+		if(option_documentation[req.query.version][req.query.option])
+			res.jsonp(option_documentation[req.query.version][req.query.option]);
 		else
 			res.status(404).end();
 	}
@@ -92,7 +96,8 @@ function get_documentation(req, res){
 		res.jsonp(option_documentation);
 }
 
-function parse_documentation(){
+function parse_documentation(clang_version){
+	var docs = {};
 	var result = fs.readFileSync(
 		'llvm/' + clang_version + '.src/docs/ClangFormatStyleOptions.rst',
 		{
@@ -111,7 +116,6 @@ function parse_documentation(){
 	result = based_on + result.substring(start + start_delimiter.length, end);
 
 	var splits = result.split(/\*\*(\w*)\*\* \(``([^`]*)``\)\n/).slice(1);
-	var docs = {};
 
 	for(var i=0; i<splits.length; i+=3)
 	{

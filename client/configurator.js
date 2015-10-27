@@ -46,6 +46,7 @@ var example =
 
 var code;
 var clang_options;
+var clang_version;
 
 $(document).ready(function(){
 	$.ajax({
@@ -72,10 +73,10 @@ $(document).ready(function(){
 
 
 	$('#update_button').on('click', function(evt){
-		request_update(clang_options);
+		request_update(clang_options, clang_version);
 	});
 	$('#save_button').on('click', function(evt){
-		save_config(clang_options);
+		save_config(clang_options, clang_version);
 	});
 });
 
@@ -85,14 +86,15 @@ function update_code(data){
 	code.selection.setRange(range);
 }
 
-function request_update(clang_options){
-	var new_config = get_config(clang_options);
+function request_update(clang_options, version){
+	var new_config = get_config(clang_options, version);
 	code.getSession().setTabSize(new_config.TabWidth || 2);
 	code.setPrintMarginColumn(new_config.ColumnLimit || 80);
 	var range = code.selection.getRange();
 
 	var options = {
 		config: JSON.stringify(new_config),
+		version: version,
 		code: code.getSession().getValue()
 	};
 
@@ -112,16 +114,16 @@ function request_update(clang_options){
 	});
 }
 
-function save_config(clang_options){
-	var yml = window.YAML.stringify(get_config(clang_options));
+function save_config(clang_options, version){
+	var yml = window.YAML.stringify(get_config(clang_options, version));
 	var blob = new Blob(['---\n',yml,'\n...\n'], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, ".clang-format");
 }
 
 
-function get_config(options){
+function get_config(options, version){
 	var result = {};
-	$.each(options, function(key, value){
+	$.each(options[version], function(key, value){
 		var option_value = $('#' + key).val();
 		if(option_value && option_value !== 'Default')
 			result[key] = option_value;
@@ -130,17 +132,34 @@ function get_config(options){
 }
 
 function create_inputs(options){
-	clang_options = options;
+
 	var container = $('#options');
 
-	$.each(options, function(key, value){
+	if(typeof(clang_version) === 'undefined')
+	{
+		clang_options = options;
+		clang_version = options.versions[0];
+
+		var version_input = select_input('clang_version', options.versions);
+		$(version_input).appendTo($('#version'));
+
+		$('#clang_version').on('change', function(evt){
+			clang_version = $('#clang_version').val();
+			container.empty();
+			create_inputs(options);
+			request_update(clang_options, clang_version);
+		});
+	}
+
+	$.each(options[clang_version], function(key, value){
 		var input = create_input(key, value);
 		$(input).appendTo(container);
 	});
 
 	$('.form-control').on('change', function(evt){
-		request_update(clang_options);
+		request_update(clang_options, clang_version);
 	});
+
 }
 
 function create_input(option_name, option_details){
