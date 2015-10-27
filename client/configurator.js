@@ -115,7 +115,12 @@ function request_update(clang_options, version){
 }
 
 function save_config(clang_options, version){
-	var yml = window.YAML.stringify(get_config(clang_options, version));
+	var config = get_config(clang_options, version);
+	var yml;
+	if(_.size(config))
+		yml = window.YAML.stringify(config);
+	else
+		yml = '';
 	var blob = new Blob(['---\n',yml,'\n...\n'], {type: "text/plain;charset=utf-8"});
 	saveAs(blob, ".clang-format");
 }
