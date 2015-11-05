@@ -6,10 +6,11 @@ var userid        = require('userid');
 var path          = require('path');
 var fs            = require('fs');
 var marked        = require('marked');
+var clang_format_config = require('./settings.js');
 
 setup_marked();
 
-var clang_versions = ['3.7.0', '3.6.2', '3.6.1', '3.6.0', '3.5.2', '3.5.0'];
+var clang_versions = clang_format_config.versions;
 
 var clang_base = path.resolve(__dirname, '../llvm');
 
@@ -35,7 +36,7 @@ app.get('/doc', function(req, res){
 	get_documentation(req, res);
 });
 
-app.listen(8038);
+app.listen(clang_format_config.port);
 
 
 function run_clang_format(clang_version, code, config, range, res){

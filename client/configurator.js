@@ -50,7 +50,7 @@ var clang_version;
 
 $(document).ready(function(){
 	$.ajax({
-		url: 'http://uwcs.co.uk:8038/doc',
+		url: 'http://uwcs.co.uk:' + clang_format_config.port + '/doc',
 		type: 'GET',
 		dataType: 'json',
 		crossDomain: true,
@@ -102,7 +102,7 @@ function request_update(clang_options, version){
 		options.range = range.start.row + ':' + range.end.row;
 
 	$.ajax({
-		url: 'http://uwcs.co.uk:8038/format',
+		url: 'http://uwcs.co.uk:' + clang_format_config.port + '/format',
 		type: 'POST',
 		dataType: 'json',
 		crossDomain: true,
