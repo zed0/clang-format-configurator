@@ -37,6 +37,7 @@ app.get('/doc', function(req, res){
 });
 
 app.listen(clang_format_config.port);
+console.log('Started server.');
 
 
 function run_clang_format(clang_version, code, config, range, res){
@@ -174,8 +175,11 @@ function setup_marked(){
 	//Enforce code having at least two backticks around it:
 	marked.InlineLexer.breaks.rules.code   = /^(``+)\s*([\s\S]*?[^`])\s*\1(?!`)/;
 
-	//Allow code in the format: \code\nfoo\nbar\nbaz\n\endcode
-	marked.Lexer.rules.tables.fences    = /^ *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\1|\\endcode) *(?:\n+|$)/;
+	//Allow code in the formats:
+	// \code\nfoo\nbar\nbaz\n\endcode
+	// .. code-block:: foo\n\nfoo\nbar\nbaz\n
+	marked.Lexer.rules.tables.fences = /^(( *)(?:`{3,}|~{3,}|\\code|\.\. code-block::.*\n))\n?((?:\n?(?!\1|\2\\endcode)\2.+)+)(\n\1|\n\2\\endcode|\n|$)/;
+
 	//Add above code syntax to stuff to skip in paragraphs
-	marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?! *(`{3,}|~{3,}|\\code)[ \.]*(\S+)? *\n([\s\S]*?)\s*(\2|\\endcode) *(?:\n+|$)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/;
+	marked.Lexer.rules.tables.paragraph = /^((?:[^\n]+\n?(?!(( *)(?:`{3,}|~{3,}|\\code|\.\. code-block::.*\n))\n?((?:\n?(?!\2|\3\\endcode)\3.+)+)(\n\2|\n\3\\endcode|\n)|( *)((?:[*+-]|\d+\.)) [\s\S]+?(?:\n+(?=\3?(?:[-*_] *){3,}(?:\n+|$))|\n+(?= *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))|\n{2,}(?! )(?!\1(?:[*+-]|\d+\.) )\n*|\s*$)|( *[-*_]){3,} *(?:\n+|$)| *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)|([^\n]+)\n *(=|-){2,} *(?:\n+|$)|( *>[^\n]+(\n(?! *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$))[^\n]+)*\n*)+|<(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\b)\w+(?!:\/|[^\w\s@]*@)\b| *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)))+)\n*/;
 }
