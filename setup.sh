@@ -26,6 +26,7 @@ function generate_binary_url {
 
 
 cd $( dirname "${BASH_SOURCE[0]}" )
+this_dir=$(pwd)
 
 cd client
 bower install
@@ -64,3 +65,33 @@ do
 		wget $binary_url --quiet -O - | tar $(tar_flags $binary_url) --strip-components=1 -C $version --occurrence=1 --wildcards '*bin/clang-format'
 	fi
 done
+
+
+while true
+do
+	read -p "Do you wish to compile HEAD of the clang git tree (Yn)?" yn
+	case $yn in
+		[Nn]* ) exit;;
+		[Yy]* ) break;;
+		'' ) break;;
+	esac
+done
+
+temp_dir=$(mktemp -d)
+git clone http://llvm.org/git/llvm.git $temp_dir
+cd $temp_dir/tools
+git clone http://llvm.org/git/clang.git clang
+cd ..
+mkdir build
+cd build
+cmake -G "Unix Makefiles" ..
+make clang-format -j $(grep -c "^processor" /proc/cpuinfo)
+cd $this_dir/server/llvm
+
+mkdir -p HEAD/bin
+cp $temp_dir/build/bin/clang-format HEAD/bin
+
+mkdir -p HEAD.src/docs
+cp $temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst HEAD.src/docs
+
+rm -rf $temp_dir
