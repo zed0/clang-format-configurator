@@ -7,7 +7,8 @@
 		<script src="https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<script src="bower_components/file-saver.js/FileSaver.js"></script>
-		<script src="yaml.js"></script>
+		<script src="yaml2json.js"></script>
+		<script src="json2yaml.js"></script>
 		<script src="settings.js"></script>
 		<script src="configurator.js"></script>
 		<!-- Google Analytics -->
@@ -31,6 +32,25 @@
 			}
 			body {
 				padding-top: 50px;
+			}
+			.btn-file {
+				position: relative;
+				overflow: hidden;
+			}
+			.btn-file input[type=file] {
+				position: absolute;
+				top: 0;
+				right: 0;
+				min-width: 100%;
+				min-height: 100%;
+				font-size: 100px;
+				text-align: right;
+				filter: alpha(opacity=0);
+				opacity: 0;
+				outline: none;
+				background: white;
+				cursor: inherit;
+				display: block;
 			}
 		</style>
 	</head>
@@ -56,6 +76,9 @@
 						>
 							<i class="fa fa-download fa-fw"></i> Save
 						</button>
+						<span class="btn btn-default btn-file">
+							<i class="fa fa-upload fa-fw"></i> Load	<input id="load_button" type="file">
+						</span>
 						<a
 							class="btn btn-default"
 							href="http://github.com/zed0/clang-format-configurator"

@@ -78,6 +78,7 @@ $(document).ready(function(){
 	$('#save_button').on('click', function(evt){
 		save_config(clang_options, clang_version);
 	});
+	$('#load_button').on('change', load_config);
 });
 
 function update_code(data){
@@ -114,6 +115,35 @@ function request_update(clang_options, version){
 	});
 }
 
+function load_config(evt){
+	_.each(evt.target.files, function(file){
+		var reader = new FileReader();
+		reader.onload = function(load_event){
+			var yml = load_event.target.result;
+			try{
+				data = window.YAML.parse(yml);
+			}
+			catch(err){
+				alert('The file you uploaded does not appear to be a valid YAML file');
+			}
+
+			_.each(data, function(value, key){
+				var clang_option = clang_options[clang_version][key];
+				if(clang_option){
+					$('#' + key).val(value);
+				}
+				else
+				{
+					console.log(key, value);
+				}
+			});
+			request_update(clang_options, clang_version);
+		};
+		reader.readAsText(file);
+	});
+	evt.target.value = '';
+}
+
 function save_config(clang_options, version){
 	var config = get_config(clang_options, version);
 	var yml;
@@ -121,8 +151,8 @@ function save_config(clang_options, version){
 		yml = window.YAML.stringify(config);
 	else
 		yml = '';
-	var blob = new Blob(['---\n',yml,'\n...\n'], {type: "text/plain;charset=utf-8"});
-	saveAs(blob, ".clang-format");
+	var blob = new Blob(['---\n',yml,'\n...\n'], {type: 'text/plain;charset=utf-8'});
+	saveAs(blob, '.clang-format');
 }
 
 
