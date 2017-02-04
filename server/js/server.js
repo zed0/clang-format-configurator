@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var express       = require('express');
+var https         = require('https');
 var body_parser   = require('body-parser');
 var child_process = require('child_process');
 var userid        = require('userid');
@@ -25,20 +26,27 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded({extended: true}));
 
 app.post('/format', function(req, res){
-	res.header("Access-Control-Allow-Origin", "http://zed0.co.uk");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	res.header('Access-Control-Allow-Origin', clang_format_config.url);
+	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	run_clang_format(req.body.version, req.body.code, req.body.config, req.body.range, res);
 });
 
 app.get('/doc', function(req, res){
-	res.header("Access-Control-Allow-Origin", "http://zed0.co.uk");
-	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	res.header('Access-Control-Allow-Origin', clang_format_config.url);
+	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	get_documentation(req, res);
 });
 
-app.listen(clang_format_config.port);
-console.log('Started server.');
 
+var privateKey = fs.readFileSync(clang_format_config.privKeyPath);
+var certificate = fs.readFileSync(clang_format_config.pubKeyPath);
+
+https.createServer({
+	key: privateKey,
+	cert: certificate
+}, app).listen(clang_format_config.port);
+
+console.log('Started server.');
 
 function run_clang_format(clang_version, code, config, range, res){
 	var proc = clang_format_process(clang_version, config, range);
