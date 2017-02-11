@@ -4,21 +4,20 @@ set -e
 
 cd $( dirname "${BASH_SOURCE[0]}" )
 
-if [ ! -e ./node ]
-then
-	ln $( which node )
-fi
-
 firejail \
+	--noprofile \
+	--force \
 	--private=$( pwd ) \
 	--private-bin=true \
 	--shell=none \
-	--ipc-namespace \
 	--nogroups \
 	--read-only=launch.sh \
 	--read-only=js \
 	--read-only=llvm \
-	--read-only=node \
+	--read-only=/usr/local/bin/node \
+	--read-only=privkey.pem \
+	--read-only=fullchain.pem \
+	--netfilter=clang-format-configurator.net \
 	--nosound \
 	--caps.drop=all \
-	-- ~/node js/server.js
+	-- /usr/local/bin/node js/server.js

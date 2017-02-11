@@ -1,0 +1,20 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+
+###################################################################
+# Simple filter intended for clang-format-configurator
+#
+###################################################################
+
+# allow webserver traffic
+-A INPUT -p tcp --dport 7038 -m state --state NEW,ESTABLISHED -j ACCEPT
+-A OUTPUT -p tcp --sport 7038 -m state --state ESTABLISHED -j ACCEPT
+
+# allow outgoing DNS
+-A OUTPUT -p udp --dport 53 -j ACCEPT
+-A INPUT -p udp --sport 53 -j ACCEPT
+
+COMMIT
+
