@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-clang_versions="3.9.0 3.8.1 3.8.1 3.7.0 3.6.2 3.6.1 3.6.0 3.5.2 3.5.0"
+clang_versions="4.0.0 3.9.1 3.9.0 3.8.1 3.8.0 3.7.0 3.6.2 3.6.1 3.6.0 3.5.2 3.5.0"
 
 clang_other_versions="
 3.4.2,http://llvm.org/releases/3.4.2/cfe-3.4.2.src.tar.gz,http://llvm.org/releases/3.4.2/clang+llvm-3.4.2-x86_64-linux-gnu-ubuntu-14.04.xz

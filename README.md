@@ -9,14 +9,12 @@ All requirements should be available through your package manager:
 * firejail (assuming you want to sandbox the process)
 
 ## Installation
-The setup script will install the various npm and bower dependencies and then download the clang-format binaries and documentation from the [official releases] (http://llvm.org/releases/download.html).
+The setup script will install the various npm and bower dependencies and then download the clang-format binaries and documentation from the [official releases](http://llvm.org/releases/download.html).
 If you want to disable some versions, or add new ones, alter the `clang_versions` variable at the top of `setup.sh`
 ```
 chmod u+x setup.sh
 ./setup.sh
 ```
-
-Currently there are a couple of hard coded ports and URIs that will need changing, I plan to make these configurable soon.
 
 ## Usage
 With firejail:
