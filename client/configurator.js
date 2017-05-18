@@ -55,9 +55,7 @@ $(document).ready(function(){
 		dataType: 'json',
 		crossDomain: true,
 		success: create_inputs,
-		error: function(err){
-			console.log(err);
-		}
+		error: handle_ajax_error
 	});
 
 	code = ace.edit('code');
@@ -108,9 +106,7 @@ function request_update(clang_options, version){
 		dataType: 'json',
 		crossDomain: true,
 		success: update_code,
-		error: function(err){
-			console.log(err);
-		},
+		error: handle_ajax_error,
 		data: options
 	});
 }
@@ -267,4 +263,10 @@ function int_input(option_name, min){
 		option_name: option_name,
 		min:         min
 	});
+}
+
+function handle_ajax_error(err){
+	console.log(err);
+	$('#error_content').text(err.statusText);
+	$('#error_modal').modal('show');
 }

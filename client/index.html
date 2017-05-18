@@ -1,9 +1,11 @@
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>clang-format configurator</title> 
+		<meta charset="UTF-8">
+		<title>clang-format configurator</title>
 		<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
 		<script src="https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -99,6 +101,18 @@
 				<div class="col-sm-6" style="position: fixed; right: 0; height: 100%;">
 					<div id="code"></div>
 				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="error_modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Error</h4>
+                    </div>
+                    <div class="modal-body" id="error_content">
+                    </div>
+	</div>
 			</div>
 		</div>
 	</body>
