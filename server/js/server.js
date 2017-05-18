@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var express       = require('express');
+var http          = require('http');
 var https         = require('https');
 var body_parser   = require('body-parser');
 var child_process = require('child_process');
@@ -12,6 +13,10 @@ var clang_format_config = require('./settings.js');
 setup_marked();
 
 var clang_versions = clang_format_config.versions;
+
+var client_url = clang_format_config.url;
+if(clang_format_config.clientPort)
+	client_url += ':' + clang_format_config.clientPort;
 
 var clang_base = path.resolve(__dirname, '../llvm');
 
@@ -26,25 +31,29 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded({extended: true}));
 
 app.post('/format', function(req, res){
-	res.header('Access-Control-Allow-Origin', clang_format_config.url);
+	res.header('Access-Control-Allow-Origin', client_url);
 	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	run_clang_format(req.body.version, req.body.code, req.body.config, req.body.range, res);
 });
 
 app.get('/doc', function(req, res){
-	res.header('Access-Control-Allow-Origin', clang_format_config.url);
+	res.header('Access-Control-Allow-Origin', client_url);
 	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	get_documentation(req, res);
 });
 
 
-var privateKey = fs.readFileSync(clang_format_config.privKeyPath);
-var certificate = fs.readFileSync(clang_format_config.pubKeyPath);
+if(clang_format_config.url.lastIndexOf('https:', 0) === 0) {
+	var privateKey = fs.readFileSync(clang_format_config.privKeyPath);
+	var certificate = fs.readFileSync(clang_format_config.pubKeyPath);
 
-https.createServer({
-	key: privateKey,
-	cert: certificate
-}, app).listen(clang_format_config.port);
+	https.createServer({
+		key: privateKey,
+		cert: certificate
+	}, app).listen(clang_format_config.port);
+} else {
+	http.createServer(app).listen(clang_format_config.port);
+}
 
 console.log('Started server.');
 
@@ -109,7 +118,7 @@ function get_documentation(req, res){
 function parse_documentation(clang_version){
 	var docs = {};
 	var result = fs.readFileSync(
-		'llvm/' + clang_version + '.src/docs/ClangFormatStyleOptions.rst',
+		clang_base + '/' + clang_version + '.src/docs/ClangFormatStyleOptions.rst',
 		{
 			encoding: 'utf8'
 		}
