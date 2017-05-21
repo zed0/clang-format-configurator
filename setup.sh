@@ -10,10 +10,10 @@ clang_other_versions="
 "
 
 function tar_flags {
-	echo xv$(echo $1 | sed '
+	echo "xv$(echo "$1" | sed '
 		/\.xz$/c\J
 		/\.gz$/c\z
-	')
+	')"
 }
 
 function generate_source_url {
@@ -25,7 +25,7 @@ function generate_binary_url {
 }
 
 
-cd $( dirname "${BASH_SOURCE[0]}" )
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 this_dir=$(pwd)
 
 cd client
@@ -40,6 +40,7 @@ cd server/llvm
 
 for normal_version in $clang_versions
 do
+	# shellcheck disable=SC2086
 	clang_other_versions="$clang_other_versions$normal_version,$(generate_source_url $normal_version),$(generate_binary_url $normal_version)
 "
 done
@@ -47,29 +48,30 @@ done
 for tuple in $clang_other_versions
 do
 	IFS=","
+	# shellcheck disable=SC2086
 	set $tuple
 	version=$1
 	source_url=$2
 	binary_url=$3
-	if [ ! -d $version.src ]
+	if [ ! -d "$version.src" ]
 	then
 		echo "Downloading $version.src"
-		mkdir $version.src
-		wget $source_url --quiet -O - | tar $(tar_flags $source_url) --strip-components=1 -C $version.src --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
+		mkdir "$version.src"
+		wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
 	fi
 
-	if [ ! -d $version ]
+	if [ ! -d "$version" ]
 	then
 		echo "Downloading $version"
-		mkdir $version
-		wget $binary_url --quiet -O - | tar $(tar_flags $binary_url) --strip-components=1 -C $version --occurrence=1 --wildcards '*bin/clang-format'
+		mkdir "$version"
+		wget "$binary_url" --quiet -O - | tar "$(tar_flags "$binary_url")" --strip-components=1 -C "$version" --occurrence=1 --wildcards '*bin/clang-format'
 	fi
 done
 
 
 while true
 do
-	read -p "Do you wish to compile HEAD of the clang git tree (Yn)?" yn
+	read -rp "Do you wish to compile HEAD of the clang git tree (Yn)?" yn
 	case $yn in
 		[Nn]* ) exit;;
 		[Yy]* ) break;;
@@ -78,20 +80,20 @@ do
 done
 
 temp_dir=$(mktemp -d)
-git clone http://llvm.org/git/llvm.git $temp_dir
-cd $temp_dir/tools
+git clone http://llvm.org/git/llvm.git "$temp_dir"
+cd "$temp_dir/tools"
 git clone http://llvm.org/git/clang.git clang
 cd ..
 mkdir build
 cd build
 cmake -G "Unix Makefiles" ..
-make clang-format -j $(grep -c "^processor" /proc/cpuinfo)
-cd $this_dir/server/llvm
+make clang-format -j "$(grep -c "^processor" /proc/cpuinfo)"
+cd "$this_dir/server/llvm"
 
 mkdir -p HEAD/bin
-cp $temp_dir/build/bin/clang-format HEAD/bin
+cp "$temp_dir/build/bin/clang-format" HEAD/bin
 
 mkdir -p HEAD.src/docs
-cp $temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst HEAD.src/docs
+cp "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
 
-rm -rf $temp_dir
+rm -rf "$temp_dir"
