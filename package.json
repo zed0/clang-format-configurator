@@ -1,6 +1,6 @@
 {
   "name": "clang-format-configurator",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Interactively view changes in clang-format configuration",
   "main": "server.js",
   "dependencies": {
@@ -9,10 +9,15 @@
     "marked": "^0.3.5",
     "userid": "^0.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "http-server": "^0.11.1"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "concurrently --kill-others \"npm run server\" \"npm run client\"",
+    "server": "node server/js/server.js",
+    "client": "cd ./client/; node ../node_modules/.bin/http-server -a localhost -o",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "clang"

@@ -28,13 +28,11 @@ function generate_binary_url {
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 this_dir=$(pwd)
 
+npm install
+
 cd client
 bower install
 cd ..
-
-cd server/js
-npm install
-cd ../..
 
 cd server/llvm
 

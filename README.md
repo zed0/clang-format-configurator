@@ -17,18 +17,18 @@ chmod u+x setup.sh
 ```
 
 ## Usage
+With node:
+```
+npm start
+```
+
 With firejail:
 ```
 server/launch.sh
 ```
 
-Without firejail:
-```
-cd server && js/server.js
-```
-
 ## History
-Version 0.0.2
+Version 0.0.3
 
 ## Credits
 Author: Ben Falconer
