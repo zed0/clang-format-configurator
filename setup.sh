@@ -28,7 +28,7 @@ function generate_source_url {
 function generate_binary_url {
     local ver
     ver=$1
-    template_urls="" 
+    template_urls=""
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-ubuntu-16.04.tar.xz"
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-ubuntu16.04.tar.xz"
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-ubuntu-14.04.tar.xz"
@@ -59,10 +59,6 @@ done
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 this_dir=$(pwd)
-
-cd client
-bower install
-cd ..
 
 cd server/js
 npm install
@@ -102,7 +98,7 @@ do
 	fi
 	set -e
 	#end of check
-	
+
 	if [ ! -d "$version.src" ]
 	then
 		echo "Downloading $version.src"
