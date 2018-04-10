@@ -4,9 +4,8 @@ See it in action at http://zed0.co.uk/clang-format-configurator
 
 ## Requirements
 All requirements should be available through your package manager:
-* node
-* bower
-* firejail (assuming you want to sandbox the process)
+* [Node.js](https://nodejs.org/en)
+* [firejail](https://github.com/netblue30/firejail) (assuming you want to sandbox the process)
 
 ## Installation
 The setup script will install the various npm and bower dependencies and then download the clang-format binaries and documentation from the [official releases](http://llvm.org/releases/download.html).
@@ -17,7 +16,7 @@ chmod u+x setup.sh
 ```
 
 ## Usage
-With node:
+With Node.js:
 ```
 npm start
 ```
