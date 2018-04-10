@@ -12,13 +12,26 @@ var clang_format_config = require('./settings.js');
 
 setup_marked();
 
-var clang_versions = clang_format_config.versions;
-
 var client_url = clang_format_config.url;
 if(clang_format_config.clientPort)
 	client_url += ':' + clang_format_config.clientPort;
 
 var clang_base = path.resolve(__dirname, '../llvm');
+
+function get_available_versions(base_dir){
+    var versionsArray = []
+	const is_bin_dir = source => (fs.lstatSync(source).isDirectory() && (source.toString().match("\.src$")===null))
+	const get_directories = source =>
+	  fs.readdirSync(source).map(name => path.join(source, name)).filter(is_bin_dir)
+	
+	list_of_dirs=get_directories(base_dir)
+	for (var i in list_of_dirs) {
+		versionsArray.push(path.basename(list_of_dirs[i]))
+	  }
+    return versionsArray
+}
+
+var clang_versions = get_available_versions(clang_base);
 
 var option_documentation = {};
 option_documentation.versions = clang_versions;
