@@ -61,11 +61,11 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 this_dir=$(pwd)
 
 cd client
-#bower install
+bower install
 cd ..
 
 cd server/js
-#npm install
+npm install
 cd ../..
 
 cd server/llvm
@@ -84,8 +84,6 @@ do
 	version=$1
 	source_url=$2
 	binary_url=$3
-	#debug
-	echo "v: $1 s: $2 b: $3"
 	#Checking urls
 	set +e
 	wget -q --spider $source_url
