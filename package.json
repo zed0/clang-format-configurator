@@ -14,6 +14,7 @@
     "http-server": "^0.11.1"
   },
   "scripts": {
+    "install": "cd ./client/; npm i",
     "start": "concurrently --kill-others \"npm run server\" \"npm run client\"",
     "server": "node server/js/server.js",
     "client": "cd ./client/; node ../node_modules/.bin/http-server -a localhost -o",
