@@ -1,18 +1,39 @@
 #!/bin/bash
 set -e
 
-#clang_versions="4.0.0 3.9.1 3.9.0 3.8.1 3.8.0 3.7.0 3.6.2 3.6.1 3.6.0 3.5.2 3.5.0"
+#Default options:
+useSystemBinaries=y
+mandatoryVersions="6.0.0 5.0.1 4.0.1 3.9.1 3.8.1"
+buildHead=y
 
-clang_versions="4.0.0"
+echo "Options for this setup:"
 
+echo "* Version to add: $mandatoryVersions"
+echo "Note: versions that not found localy will be downloaded"
 
-#clang_other_versions="
-#3.4.2,http://llvm.org/releases/3.4.2/cfe-3.4.2.src.tar.gz,http://llvm.org/releases/3.4.2/clang+llvm-3.4.2-x86_64-linux-gnu-ubuntu-14.04.xz
-#3.4.1,http://llvm.org/releases/3.4.1/cfe-3.4.1.src.tar.gz,http://llvm.org/releases/3.4.1/clang+llvm-3.4.1-x86_64-unknown-ubuntu12.04.tar.xz
-#3.4,http://llvm.org/releases/3.4/clang-3.4.src.tar.gz,http://llvm.org/releases/3.4/clang+llvm-3.4-x86_64-unknown-ubuntu12.04.tar.xz
-#"
+if [[ $useSystemBinaries == [Yy] ]]; then
+    echo "* Use system clang-format versions: YES"
+else 
+    echo "* Use system clang-format versions: NO"
+fi
 
-clang_other_versions=""
+if [[ $buildHead == [Yy] ]]; then
+    echo "* Build HEAD version for server: YES"
+else 
+    echo "* Build HEAD version for server: NO"
+fi
+
+while true
+do
+	read -rp "Do you want to proceed?" yn
+	case $yn in
+		[Nn]* ) exit;;
+		[Yy]* ) break;;
+		'' ) break;;
+	esac
+done
+
+formatted_array=""
 
 function tar_flags {
 	echo "xv$(echo "$1" | sed '
@@ -21,11 +42,11 @@ function tar_flags {
 	')"
 }
 
-function generate_source_url {
+function generate_source_url_from_version {
 	echo "http://llvm.org/releases/$1/cfe-$1.src.tar.xz"
 }
 
-function generate_binary_url {
+function generate_binary_url_from_version {
     local ver
     ver=$1
     template_urls=""
@@ -47,32 +68,43 @@ function generate_binary_url {
 	set -e
 }
 
+local_versions=""
+if [[ $useSystemBinaries == [Yy] ]]; then
+    #get all installed binaries of clang-format and skip not existing directories warnings
+    clang_local_binaries=$(echo -n $(find {,/usr}/{,s}bin/clang-format{,-[0-9]*} 2>/dev/null))
+    for clang_bin in $clang_local_binaries
+    do
+        version=$(${clang_bin} --version | sed 's/.*version \([^ -]*\).*/\1/')
+        local_versions+="$version\n"
+        #echo "Found local version: $version - ${clang_bin}"
+        formatted_array+=" ${version},$(generate_source_url_from_version ${version}),${clang_bin}"
+    done
 
-#get all installed binaries of clang-format and skip not existing directories warnings
-clang_local_binaries=$(echo -n $(find {,/usr}/{,s}bin/clang-format{,-[0-9]*} 2>/dev/null))
-for clang_bin in $clang_local_binaries
-do
-	version=$(${clang_bin} --version | sed 's/.*version \([^ -]*\).*/\1/')
-	echo "Found local version: $version - ${clang_bin}"
-	clang_other_versions+=" ${version},$(generate_source_url ${version}),${clang_bin}"
-done
+    echo "Found local versions"
+    echo -e "$local_versions" | column -c 50
+fi
 
-cd "$( dirname "${BASH_SOURCE[0]}" )"
-this_dir=$(pwd)
+path="/tmp/clang.text"
+wget -qO- http://releases.llvm.org/ | gunzip > "$path"
+online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
 
-cd server/js
-npm install
-cd ../..
+echo "Found versions on website:"
+echo "$online_versions" | column -c 50
 
-cd server/llvm
-
-for normal_version in $clang_versions
+for normal_version in $mandatoryVersions
 do
 	# shellcheck disable=SC2086
-	clang_other_versions+=" $normal_version,$(generate_source_url $normal_version),$(generate_binary_url $normal_version)"
+	formatted_array+=" $normal_version,$(generate_source_url_from_version $normal_version),$(generate_binary_url_from_version $normal_version)"
 done
 
-for tuple in $clang_other_versions
+pushd server/js
+echo "Doing npm install"
+npm install
+popd
+
+pushd server/llvm
+
+for tuple in $formatted_array
 do
 	IFS=","
 	# shellcheck disable=SC2086
@@ -120,31 +152,25 @@ do
 done
 
 
-while true
-do
-	read -rp "Do you wish to compile HEAD of the clang git tree (Yn)?" yn
-	case $yn in
-		[Nn]* ) exit;;
-		[Yy]* ) break;;
-		'' ) break;;
-	esac
-done
+if [[ $buildHead == [yY] ]]; then
+    echo "Building HEAD"
+    temp_dir=$(mktemp -d)
+    git clone http://llvm.org/git/llvm.git "$temp_dir"
+    pushd "$temp_dir/tools"
+    git clone http://llvm.org/git/clang.git clang
+    popd
+    pushd $temp_dir
+    mkdir build
+    cd build
+    cmake -G "Unix Makefiles" ..
+    make clang-format -j "$(grep -c "^processor" /proc/cpuinfo)"
+    popd
 
-temp_dir=$(mktemp -d)
-git clone http://llvm.org/git/llvm.git "$temp_dir"
-cd "$temp_dir/tools"
-git clone http://llvm.org/git/clang.git clang
-cd ..
-mkdir build
-cd build
-cmake -G "Unix Makefiles" ..
-make clang-format -j "$(grep -c "^processor" /proc/cpuinfo)"
-cd "$this_dir/server/llvm"
+    mkdir -p HEAD/bin
+    cp "$temp_dir/build/bin/clang-format" HEAD/bin
 
-mkdir -p HEAD/bin
-cp "$temp_dir/build/bin/clang-format" HEAD/bin
+    mkdir -p HEAD.src/docs
+    cp "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
 
-mkdir -p HEAD.src/docs
-cp "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
-
-rm -rf "$temp_dir"
+    rm -rf "$temp_dir"
+fi
