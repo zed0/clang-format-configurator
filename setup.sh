@@ -91,6 +91,8 @@ online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po 
 echo "Found versions on website:"
 echo "$online_versions" | column -c 50
 
+
+echo "Getting binary links"
 for normal_version in $mandatoryVersions
 do
 	# shellcheck disable=SC2086
@@ -155,9 +157,9 @@ done
 if [[ $buildHead == [yY] ]]; then
     echo "Building HEAD"
     temp_dir=$(mktemp -d)
-    git clone http://llvm.org/git/llvm.git "$temp_dir"
+    git clone --depth 1 http://llvm.org/git/llvm.git "$temp_dir"
     pushd "$temp_dir/tools"
-    git clone http://llvm.org/git/clang.git clang
+    git clone --depth 1 http://llvm.org/git/clang.git clang
     popd
     pushd $temp_dir
     mkdir build
