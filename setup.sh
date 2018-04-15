@@ -68,6 +68,7 @@ function generate_binary_url_from_version {
 	set -e
 }
 
+#filling local list only if usage enabled
 local_versions=""
 if [[ $useSystemBinaries == [Yy] ]]; then
     #get all installed binaries of clang-format and skip not existing directories warnings
@@ -82,6 +83,7 @@ if [[ $useSystemBinaries == [Yy] ]]; then
 
     echo "Found local versions"
     echo -e "$local_versions" | column -c 50
+    local_versions=$(echo -e $local_versions)
 fi
 
 path="/tmp/clang.text"
@@ -95,8 +97,11 @@ echo "$online_versions" | column -c 50
 echo "Getting binary links"
 for normal_version in $mandatoryVersions
 do
-	# shellcheck disable=SC2086
-	formatted_array+=" $normal_version,$(generate_source_url_from_version $normal_version),$(generate_binary_url_from_version $normal_version)"
+	#adding online version if only not in local list
+    if [ "${local_versions/$normal_version}" = "$local_versions" ]; then
+        # shellcheck disable=SC2086
+        formatted_array+=" $normal_version,$(generate_source_url_from_version $normal_version),$(generate_binary_url_from_version $normal_version)"       
+    fi
 done
 
 pushd server/js
