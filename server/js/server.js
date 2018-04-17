@@ -171,23 +171,32 @@ function parse_documentation(clang_version){
 			docs[name].options = get_select_options(name, doc);
 		}
 	}
+
 	return docs;
 }
 
 function get_select_options(name, doc){
 	var start_delimiter = '  Possible values:\n\n';
+	var start_delimiter_nested = '  Nested configuration flags:\n\n'
 	var start = doc.search(start_delimiter);
 	var search_area = doc.substring(start + start_delimiter.length);
+	var split_jump = 2
 
 	var splits;
-	if(name === 'BasedOnStyle')
+	if(name === 'BasedOnStyle'){
 		splits = search_area.split(/  \* ``(\w*)``\n/).slice(1);
-	else
+	}
+	else if (name === 'BraceWrapping') {
+		var start_nested = doc.search(start_delimiter_nested);
+		var search_area_nested = doc.substring(start_nested + start_delimiter_nested.length);
+		splits = search_area_nested.split(/  \* ``(\w*) (\w*)`` .*\n/).slice(2);
+		split_jump = 3
+	} else
 		splits = search_area.split(/  \* ``\w*`` \(in configuration: ``(\w*)``\)\n/).slice(1);
 
 	var result = [];
 
-	for(var i=0; i<splits.length; i+=2)
+	for(var i=0; i<splits.length; i+=split_jump)
 		result.push(splits[i]);
 
 	return result;

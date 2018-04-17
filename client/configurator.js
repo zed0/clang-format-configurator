@@ -195,7 +195,10 @@ function create_inputs(options){
 
 function create_input(option_name, option_details){
 	var input_template;
-	if($.isArray(option_details.options))
+
+	if(option_details.type === 'BraceWrappingFlags')
+		input_template = flags_input(option_name, option_details.options);
+	else if($.isArray(option_details.options))
 		input_template = select_input(option_name, ['Default'].concat(option_details.options));
 	else if(option_details.type === 'bool')
 		input_template = select_input(option_name, ['Default', true, false]);
@@ -262,6 +265,28 @@ function int_input(option_name, min){
 	return _.template(template)({
 		option_name: option_name,
 		min:         min
+	});
+}
+
+function flags_input(option_name, options){
+	var switch_options = ['Default', 'Custom'];
+	var template =
+		'		<select id="<%= option_name %>" class="form-control">' +
+		'			<% _.forEach(switch_options, function(option){%>' +
+		'				<option value="<%= option %>"><%= option %></option>' +
+		'			<%});%>' +
+		'		</select>' +
+		'<fieldset>' +
+		'<legend><%= option_name %></legend>' +
+		'			<% _.forEach(options, function(option){%>' +
+		'           <input type="checkbox" value="<%= option %>" /><label for="cb1"><%= option %></label><br/>'+
+		'			<%});%>' +
+		'</ul>'+
+		'</fieldset>';
+	return _.template(template)({
+		option_name: option_name,
+		options:     options,
+		switch_options: switch_options
 	});
 }
 
