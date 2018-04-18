@@ -6,19 +6,19 @@
   "dependencies": {
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
+    "file-saver": "^1.3.8",
     "marked": "^0.3.5",
     "userid": "^0.2.0"
   },
   "devDependencies": {
     "concurrently": "^3.5.1",
-    "http-server": "^0.11.1"
+    "parcel-bundler": "^1.7.0"
   },
   "scripts": {
-    "install": "cd ./client/; npm i",
-    "start": "concurrently --kill-others \"npm run server\" \"npm run client\"",
-    "server": "node server/js/server.js",
-    "client": "cd ./client/; node ../node_modules/.bin/http-server -a localhost -o",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "concurrently --kill-others \"npm run server\" \"npm run client\" \"npm run client:watch\"",
+    "server": "node server/server.js",
+    "client": "./node_modules/.bin/parcel ./client/index.html -p 8080 --open",
+    "client:watch": "./node_modules/.bin/parcel watch ./client/index.html"
   },
   "keywords": [
     "clang"

@@ -20,4 +20,4 @@ firejail \
 	--netfilter=clang-format-configurator.net \
 	--nosound \
 	--caps.drop=all \
-	-- /usr/local/bin/node js/server.js
+	-- /usr/local/bin/node server.js

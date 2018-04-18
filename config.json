@@ -1,0 +1,5 @@
+{
+  "serverPort": 8038,
+  "clientPort": 8080,
+  "url": "http://localhost"
+}

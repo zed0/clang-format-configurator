@@ -1,3 +1,6 @@
+import FileSaver from 'file-saver';
+import config from '../config.json';
+
 var example =
 	'#include <iostream>\n' +
 	'#include <algorithm>\n' +
@@ -50,7 +53,7 @@ var clang_version;
 
 $(document).ready(function(){
 	$.ajax({
-		url: clang_format_config.url + ':' + clang_format_config.port + '/doc',
+		url: config.url + ':' + config.serverPort + '/doc',
 		type: 'GET',
 		dataType: 'json',
 		crossDomain: true,
@@ -101,7 +104,7 @@ function request_update(clang_options, version){
 		options.range = range.start.row + ':' + range.end.row;
 
 	$.ajax({
-		url: clang_format_config.url + ':' + clang_format_config.port + '/format',
+		url: config.url + ':' + config.serverPort + '/format',
 		type: 'POST',
 		dataType: 'json',
 		crossDomain: true,
@@ -148,7 +151,7 @@ function save_config(clang_options, version){
 	else
 		yml = '';
 	var blob = new Blob(['---\n',yml,'\n...\n'], {type: 'text/plain;charset=utf-8'});
-	saveAs(blob, '.clang-format');
+	FileSaver.saveAs(blob, '.clang-format');
 }
 
 

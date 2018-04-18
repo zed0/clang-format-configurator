@@ -8,22 +8,22 @@ var userid        = require('userid');
 var path          = require('path');
 var fs            = require('fs');
 var marked        = require('marked');
-var clang_format_config = require('./settings.js');
+var config = require('../config.json');
 
 setup_marked();
 
-var client_url = clang_format_config.url;
-if(clang_format_config.clientPort)
-	client_url += ':' + clang_format_config.clientPort;
+var client_url = config.url;
+if(config.clientPort)
+	client_url += ':' + config.clientPort;
 
-var clang_base = path.resolve(__dirname, '../llvm');
+var clang_base = path.resolve(__dirname, 'llvm');
 
 function get_available_versions(base_dir){
     var versionsArray = []
 	const is_bin_dir = source => (fs.lstatSync(source).isDirectory() && (source.toString().match("\.src$")===null))
 	const get_directories = source =>
 	  fs.readdirSync(source).map(name => path.join(source, name)).filter(is_bin_dir)
-	
+
 	list_of_dirs=get_directories(base_dir)
 	for (var i in list_of_dirs) {
 		versionsArray.push(path.basename(list_of_dirs[i]))
@@ -56,16 +56,16 @@ app.get('/doc', function(req, res){
 });
 
 
-if(clang_format_config.url.lastIndexOf('https:', 0) === 0) {
-	var privateKey = fs.readFileSync(clang_format_config.privKeyPath);
-	var certificate = fs.readFileSync(clang_format_config.pubKeyPath);
+if(config.url.lastIndexOf('https:', 0) === 0) {
+	var privateKey = fs.readFileSync(config.privKeyPath);
+	var certificate = fs.readFileSync(config.pubKeyPath);
 
 	https.createServer({
 		key: privateKey,
 		cert: certificate
-	}, app).listen(clang_format_config.port);
+	}, app).listen(config.serverPort);
 } else {
-	http.createServer(app).listen(clang_format_config.port);
+	http.createServer(app).listen(config.serverPort);
 }
 
 console.log('Started server.');
