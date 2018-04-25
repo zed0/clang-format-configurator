@@ -25,7 +25,7 @@ fi
 
 while true
 do
-	read -rp "Do you want to proceed?" yn
+	read -rp "Do you want to proceed? (Yn)" yn
 	case $yn in
 		[Nn]* ) exit;;
 		[Yy]* ) break;;
@@ -66,6 +66,18 @@ function generate_binary_url_from_version {
         fi
 	done
 	set -e
+}
+
+function generate_default_options_list {
+    local version
+    local listOfBaseStyles
+    version=$1
+    listOfBaseStyles=$(echo -n "$($2 "$version.src/docs/ClangFormatStyleOptions.rst")")
+    for style in $listOfBaseStyles
+    do
+        ${version}/bin/clang-format -style=$style -dump-config > "${version}.src/docs/${style}.config"
+    done
+    
 }
 
 #filling local list only if usage enabled
@@ -109,6 +121,8 @@ echo "Doing npm install"
 npm install
 popd
 
+parser_awk="$PWD/parser.awk"
+
 pushd server/llvm
 
 for tuple in $formatted_array
@@ -143,6 +157,7 @@ do
 		echo "Downloading $version.src"
 		mkdir "$version.src"
 		wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
+		generate_default_options_list "$version" "$parser_awk"
 	fi
 
 	if [ ! -d "$version" ]; then
