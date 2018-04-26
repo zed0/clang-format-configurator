@@ -187,12 +187,14 @@ if [[ $buildHead == [yY] ]]; then
     cmake -G "Unix Makefiles" ..
     make clang-format -j "$(grep -c "^processor" /proc/cpuinfo)"
     popd
+    version="HEAD"
 
-    mkdir -p HEAD/bin
-    cp "$temp_dir/build/bin/clang-format" HEAD/bin
+    mkdir -p $version/bin
+    cp -f "$temp_dir/build/bin/clang-format" HEAD/bin
 
-    mkdir -p HEAD.src/docs
-    cp "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
+    mkdir -p $version.src/docs
+    cp -f "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
+    generate_default_options_list "$version" "$parser_awk"
 
     rm -rf "$temp_dir"
 fi
