@@ -152,14 +152,6 @@ do
 	set -e
 	#end of check
 
-	if [ ! -d "$version.src" ]
-	then
-		echo "Downloading $version.src"
-		mkdir "$version.src"
-		wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
-		generate_default_options_list "$version" "$parser_awk"
-	fi
-
 	if [ ! -d "$version" ]; then
 		mkdir "$version"
 		if [ -f $binary_url ]; then
@@ -170,6 +162,14 @@ do
 				echo "Downloading $version"
 				wget "$binary_url" --quiet -O - | tar "$(tar_flags "$binary_url")" --strip-components=1 -C "$version" --occurrence=1 --wildcards '*bin/clang-format'
 		fi
+	fi
+	
+	if [ ! -d "$version.src" ]
+	then
+		echo "Downloading $version.src"
+		mkdir "$version.src"
+		wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
+		generate_default_options_list "$version" "$parser_awk"
 	fi
 done
 
