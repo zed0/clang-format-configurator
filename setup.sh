@@ -73,11 +73,19 @@ function generate_default_options_list {
     local listOfBaseStyles
     version=$1
     listOfBaseStyles=$(echo -n "$($2 "$version.src/docs/ClangFormatStyleOptions.rst")")
+    jsFilename="${version}.src/docs/defaults.js"
+    echo "{" > "$jsFilename"
     for style in $listOfBaseStyles
     do
-        ${version}/bin/clang-format -style=$style -dump-config > "${version}.src/docs/${style}.config"
+        echo "\"${style}\" : " >> "$jsFilename"
+        ${version}/bin/clang-format -style=$style -dump-config > "${version}.src/docs/${style}.yaml"
+        js-yaml "${version}.src/docs/${style}.yaml" >> "$jsFilename"
+        echo "," >> "$jsFilename"
+        rm -f "${version}.src/docs/${style}.yaml"
     done
-    
+    #removing last ,
+    sed -i '$ d' "$jsFilename"
+    echo "}" >> "$jsFilename"
 }
 
 #filling local list only if usage enabled
@@ -119,6 +127,7 @@ done
 pushd server/js
 echo "Doing npm install"
 npm install
+npm install -g js-yaml
 popd
 
 parser_awk="$PWD/parser.awk"
