@@ -1,5 +1,6 @@
 import FileSaver from 'file-saver';
 import config from '../config.json';
+import jsyaml from "js-yaml"
 
 var example =
 	'#include <iostream>\n' +
@@ -120,7 +121,7 @@ function load_config(evt){
 		reader.onload = function(load_event){
 			var yml = load_event.target.result;
 			try{
-				data = window.YAML.parse(yml);
+				var data = jsyaml.safeLoad(yml);
 			}
 			catch(err){
 				alert('The file you uploaded does not appear to be a valid YAML file');
@@ -147,7 +148,13 @@ function save_config(clang_options, version){
 	var config = get_config(clang_options, version);
 	var yml;
 	if(_.size(config))
-		yml = window.YAML.stringify(config);
+	{
+		try {
+			yml = jsyaml.safeDump(config);
+		} catch (error) {
+			console.log(error);
+		}
+	}
 	else
 		yml = '';
 	var blob = new Blob(['---\n',yml,'\n...\n'], {type: 'text/plain;charset=utf-8'});
