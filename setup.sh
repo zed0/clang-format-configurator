@@ -124,10 +124,8 @@ do
     fi
 done
 
-pushd server/js
 echo "Doing npm install"
 npm install
-popd
 
 yaml_parser="$PWD/node_modules/js-yaml/bin/js-yaml.js"
 parser_awk="$PWD/parser.awk"
