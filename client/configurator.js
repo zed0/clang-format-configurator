@@ -1,52 +1,9 @@
 import FileSaver from 'file-saver';
 import config from '../config.json';
 import jsyaml from "js-yaml"
+import fs from "fs";
 
-var example =
-	'#include <iostream>\n' +
-	'#include <algorithm>\n' +
-	'#include <functional>\n' +
-	'#include <iterator>\n' +
-	'#include <cstdlib>\n' +
-	'#include <ctime>\n' +
-	'\n' +
-	'template <typename T, int size> bool is_sorted(T(&array)[size]) {\n' +
-	'  return std::adjacent_find(array, array + size, std::greater<T>()) ==\n' +
-	'         array + size;\n' +
-	'}\n' +
-	'\n' +
-	'int main() {\n' +
-	'  std::srand(std::time(0));\n' +
-	'\n' +
-	'  int list[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};\n' +
-	'\n' +
-	'  do {\n' +
-	'    std::random_shuffle(list, list + 9);\n' +
-	'  } while (is_sorted(list));\n' +
-	'\n' +
-	'  int score = 0;\n' +
-	'\n' +
-	'  do {\n' +
-	'    std::cout << "Current list: ";\n' +
-	'    std::copy(list, list + 9, std::ostream_iterator<int>(std::cout, " "));\n' +
-	'\n' +
-	'    int rev;\n' +
-	'    while (true) {\n' +
-	'      std::cout << "\\nDigits to reverse? ";\n' +
-	'      std::cin >> rev;\n' +
-	'      if (rev > 1 && rev < 10)\n' +
-	'        break;\n' +
-	'      std::cout << "Please enter a value between 2 and 9.";\n' +
-	'    }\n' +
-	'\n' +
-	'    ++score;\n' +
-	'    std::reverse(list, list + rev);\n' +
-	'  } while (!is_sorted(list));\n' +
-	'\n' +
-	'  std::cout << "Congratulations, you sorted the list.\\n"\n' +
-	'            << "You needed " << score << " reversals." << std::endl;\n' +
-	'  return 0;\n' +
-	'}\n';
+var example = fs.readFileSync("CodeExample.cpp", 'utf8').toString();
 
 var code;
 var clang_options;
@@ -279,13 +236,7 @@ function int_input(option_name, min){
 }
 
 function flags_input(option_name, options){
-	var switch_options = ['Default', 'Custom'];
 	var template =
-		'		<select id="<%= option_name %>" class="form-control">' +
-		'			<% _.forEach(switch_options, function(option){%>' +
-		'				<option value="<%= option %>"><%= option %></option>' +
-		'			<%});%>' +
-		'		</select>' +
 		'<fieldset>' +
 		'<legend><%= option_name %></legend>' +
 		'			<% _.forEach(options, function(option){%>' +
@@ -296,7 +247,6 @@ function flags_input(option_name, options){
 	return _.template(template)({
 		option_name: option_name,
 		options:     options,
-		switch_options: switch_options
 	});
 }
 
