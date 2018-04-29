@@ -79,7 +79,7 @@ function generate_default_options_list {
     do
         echo "\"${style}\" : " >> "$jsFilename"
         ${version}/bin/clang-format -style=$style -dump-config > "${version}.src/docs/${style}.yaml"
-        js-yaml "${version}.src/docs/${style}.yaml" >> "$jsFilename"
+        $yaml_parser "${version}.src/docs/${style}.yaml" >> "$jsFilename"
         echo "," >> "$jsFilename"
         rm -f "${version}.src/docs/${style}.yaml"
     done
@@ -127,9 +127,9 @@ done
 pushd server/js
 echo "Doing npm install"
 npm install
-npm install -g js-yaml
 popd
 
+yaml_parser="$PWD/node_modules/js-yaml/bin/js-yaml.js"
 parser_awk="$PWD/parser.awk"
 
 pushd server/llvm
