@@ -39,6 +39,13 @@ clang_versions.forEach(function(version){
 	option_documentation[version] = parse_documentation(version);
 });
 
+var option_defaults = {};
+option_defaults.versions = clang_versions;
+clang_versions.forEach(function(version){
+	option_defaults[version] = JSON.parse(fs.readFileSync(clang_base + '/' + version + 
+	'.src/docs/defaults.js', 'utf8'));
+});
+
 var app = express();
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({extended: true}));
@@ -55,6 +62,11 @@ app.get('/doc', function(req, res){
 	get_documentation(req, res);
 });
 
+app.get('/defaults', function(req, res){
+	res.header('Access-Control-Allow-Origin', client_url);
+	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+	get_defaults(req, res);
+});
 
 if(config.url.lastIndexOf('https:', 0) === 0) {
 	var privateKey = fs.readFileSync(config.privKeyPath);
@@ -200,6 +212,18 @@ function get_select_options(name, doc){
 		result.push(splits[i]);
 
 	return result;
+}
+
+function get_defaults(req, res){
+	if(req.query.option)
+	{
+		if(option_defaults[req.query.version][req.query.option])
+			res.jsonp(option_defaults[req.query.version][req.query.option]);
+		else
+			res.status(404).end();
+	}
+	else
+		res.jsonp(option_defaults);
 }
 
 function setup_marked(){
