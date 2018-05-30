@@ -22,8 +22,8 @@ template <typename T, int size> bool is_sorted(T(&array)[size]) {
 }
 
 std::vector<uint32_t> returnVector( uint32_t* LongNameForParameter1,
-                                    double* LongNameForParameter2
-                                    const float& LongNameForParameter3
+                                    double* LongNameForParameter2,
+                                    const float& LongNameForParameter3,
                                     const std::map<std::string,int32_t>& LongNameForParameter4) {
     
     //TODO: This is a long comment that allows you to understand how long comments will be trimmed. Here should be deep thought but it's just not right time for this
