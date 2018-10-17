@@ -11,7 +11,7 @@ var clang_version;
 
 $(document).ready(function(){
 	$.ajax({
-		url: config.url + ':' + config.serverPort + '/doc',
+		url: config.url + '/doc',
 		type: 'GET',
 		dataType: 'json',
 		crossDomain: true,
@@ -62,7 +62,7 @@ function request_update(clang_options, version){
 		options.range = range.start.row + ':' + range.end.row;
 
 	$.ajax({
-		url: config.url + ':' + config.serverPort + '/format',
+		url: config.url + '/format',
 		type: 'POST',
 		dataType: 'json',
 		crossDomain: true,

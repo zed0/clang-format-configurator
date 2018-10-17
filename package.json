@@ -16,10 +16,7 @@
     "parcel-bundler": "^1.7.0"
   },
   "scripts": {
-    "start": "concurrently --kill-others \"npm run server\" \"npm run client\" \"npm run client:watch\"",
-    "server": "node server/server.js",
-    "client": "./node_modules/.bin/parcel ./client/index.html -p 8080 --open",
-    "client:watch": "./node_modules/.bin/parcel watch ./client/index.html"
+    "start": "node server/server.js"
   },
   "keywords": [
     "clang"

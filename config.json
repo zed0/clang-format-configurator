@@ -1,5 +1,7 @@
 {
-  "serverPort": 8038,
-  "clientPort": 8080,
-  "url": "http://localhost"
+  "port": 8080,
+  "url": "https://localhost:8080/",
+  "useOwnEncryption": true,
+  "privKeyPath": "/path/to/privKey.pem",
+  "pubKeyPath": "/path/to/pubKey.pem"
 }

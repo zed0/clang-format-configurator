@@ -3,18 +3,16 @@ var express       = require('express');
 var http          = require('http');
 var https         = require('https');
 var body_parser   = require('body-parser');
+var Bundler       = require('parcel-bundler');
 var child_process = require('child_process');
 var userid        = require('userid');
 var path          = require('path');
 var fs            = require('fs');
 var marked        = require('marked');
+var url           = require('url');
 var config = require('../config.json');
 
 setup_marked();
-
-var client_url = config.url;
-if(config.clientPort)
-	client_url += ':' + config.clientPort;
 
 var clang_base = path.resolve(__dirname, 'llvm');
 
@@ -30,6 +28,8 @@ function get_available_versions(base_dir){
 	  }
     return versionsArray
 }
+
+const serverUrl = new url.URL(config.url);
 
 var clang_versions = get_available_versions(clang_base);
 
@@ -51,33 +51,43 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded({extended: true}));
 
 app.post('/format', function(req, res){
-	res.header('Access-Control-Allow-Origin', client_url);
+	res.header('Access-Control-Allow-Origin', serverUrl.href);
 	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	run_clang_format(req.body.version, req.body.code, req.body.config, req.body.range, res);
 });
 
 app.get('/doc', function(req, res){
-	res.header('Access-Control-Allow-Origin', client_url);
+	res.header('Access-Control-Allow-Origin', serverUrl.href);
 	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	get_documentation(req, res);
 });
 
 app.get('/defaults', function(req, res){
-	res.header('Access-Control-Allow-Origin', client_url);
+	res.header('Access-Control-Allow-Origin', serverUrl.href);
 	res.header('Access-Control-Allow-Headers', 'X-Requested-With');
 	get_defaults(req, res);
 });
 
-if(config.url.lastIndexOf('https:', 0) === 0) {
+const bundlerOptions = {
+	publicUrl: serverUrl.pathname,
+	watch: false,
+};
+const bundler = new Bundler(path.resolve(__dirname, '../client/index.html'), bundlerOptions);
+
+server = express();
+server.use(serverUrl.pathname, app);
+server.use(bundler.middleware());
+
+if(config.useOwnEncryption) {
 	var privateKey = fs.readFileSync(config.privKeyPath);
 	var certificate = fs.readFileSync(config.pubKeyPath);
 
 	https.createServer({
 		key: privateKey,
 		cert: certificate
-	}, app).listen(config.serverPort);
+	}, server).listen(config.port);
 } else {
-	http.createServer(app).listen(config.serverPort);
+	http.createServer(server).listen(config.port);
 }
 
 console.log('Started server.');
