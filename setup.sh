@@ -3,13 +3,19 @@ set -e
 
 #Default options:
 useSystemBinaries=y
+# Use all online versions OR the list of mandatory versions
+useAllOnlineVersions=n
 mandatoryVersions="6.0.0 5.0.1 4.0.1 3.9.1 3.8.1"
 buildHead=y
 
 echo "Options for this setup:"
 
-echo "* Version to add: $mandatoryVersions"
-echo "Note: versions that not found localy will be downloaded"
+if [[ $useAllOnlineVersions == [Yy] ]]; then
+    echo "* Version to add: All"
+else
+    echo "* Version to add: $mandatoryVersions"
+    echo "Note: versions that not found localy will be downloaded"
+fi
 
 if [[ $useSystemBinaries == [Yy] ]]; then
     echo "* Use system clang-format versions: YES"
@@ -113,9 +119,15 @@ online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po 
 echo "Found versions on website:"
 echo "$online_versions" | column -c 50
 
+versionsToGenerate=""
+if [[ $useAllOnlineVersions == [Yy] ]]; then
+    versionsToGenerate=$online_versions
+else
+    versionsToGenerate=$mandatoryVersions
+fi
 
 echo "Getting binary links"
-for normal_version in $mandatoryVersions
+for normal_version in $versionsToGenerate
 do
 	#adding online version if only not in local list
     if [ "${local_versions/$normal_version}" = "$local_versions" ]; then
