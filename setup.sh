@@ -107,7 +107,7 @@ if [[ $useSystemBinaries == [Yy] ]]; then
 fi
 
 path="/tmp/clang.text"
-wget -qO- http://releases.llvm.org/ | gunzip > "$path"
+wget -qO- http://releases.llvm.org/ > "$path"
 online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
 
 echo "Found versions on website:"
