@@ -31,25 +31,25 @@ fi
 
 while true
 do
-	read -rp "Do you want to proceed? (Yn)" yn
-	case $yn in
-		[Nn]* ) exit;;
-		[Yy]* ) break;;
-		'' ) break;;
-	esac
+    read -rp "Do you want to proceed? (Yn)" yn
+    case $yn in
+        [Nn]* ) exit;;
+        [Yy]* ) break;;
+        '' ) break;;
+    esac
 done
 
 formatted_array=""
 
 function tar_flags {
-	echo "xv$(echo "$1" | sed '
-		/\.xz$/c\J
-		/\.gz$/c\z
-	')"
+    echo "xv$(echo "$1" | sed '
+        /\.xz$/c\J
+        /\.gz$/c\z
+    ')"
 }
 
 function generate_source_url_from_version {
-	echo "http://llvm.org/releases/$1/cfe-$1.src.tar.xz"
+    echo "http://llvm.org/releases/$1/cfe-$1.src.tar.xz"
 }
 
 function generate_binary_url_from_version {
@@ -61,7 +61,7 @@ function generate_binary_url_from_version {
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-ubuntu-14.04.tar.xz"
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-ubuntu14.04.tar.xz"
     template_urls+=" http://llvm.org/releases/$ver/clang+llvm-$ver-x86_64-linux-gnu-debian8.tar.xz"
-	set +e
+    set +e
     for url in $template_urls
     do
         wget -q --spider $url
@@ -70,8 +70,8 @@ function generate_binary_url_from_version {
             echo "$url"
             break
         fi
-	done
-	set -e
+    done
+    set -e
 }
 
 function generate_default_options_list {
@@ -129,7 +129,7 @@ fi
 echo "Getting binary links"
 for normal_version in $versionsToGenerate
 do
-	#adding online version if only not in local list
+    #adding online version if only not in local list
     if [ "${local_versions/$normal_version}" = "$local_versions" ]; then
         # shellcheck disable=SC2086
         formatted_array+=" $normal_version,$(generate_source_url_from_version $normal_version),$(generate_binary_url_from_version $normal_version)"       
@@ -146,50 +146,50 @@ pushd server/llvm
 
 for tuple in $formatted_array
 do
-	IFS=","
-	# shellcheck disable=SC2086
-	set $tuple
-	version=$1
-	source_url=$2
-	binary_url=$3
-	#Checking urls
-	set +e
-	wget -q --spider $source_url
-	result=$?
-	if [ $result -ne 0 ]; then
-		echo "Wrong source url for version $version. Skipping"
-		continue
-	fi
-	if [ ! -f $binary_url ]; then
-		wget -q --spider $binary_url
-		result=$?
-		if [ $result -ne 0 ]; then
-			echo "Wrong binary url for version $version. Skipping"
-			continue
-		fi
-	fi
-	set -e
-	#end of check
+    IFS=","
+    # shellcheck disable=SC2086
+    set $tuple
+    version=$1
+    source_url=$2
+    binary_url=$3
+    #Checking urls
+    set +e
+    wget -q --spider $source_url
+    result=$?
+    if [ $result -ne 0 ]; then
+        echo "Wrong source url for version $version. Skipping"
+        continue
+    fi
+    if [ ! -f $binary_url ]; then
+        wget -q --spider $binary_url
+        result=$?
+        if [ $result -ne 0 ]; then
+            echo "Wrong binary url for version $version. Skipping"
+            continue
+        fi
+    fi
+    set -e
+    #end of check
 
-	if [ ! -d "$version" ]; then
-		mkdir "$version"
-		if [ -f $binary_url ]; then
-				echo "Creating symlink $version"
-				mkdir -p "$version/bin"
-				ln -s "$binary_url" "$version/bin/clang-format"
-		else
-				echo "Downloading $version"
-				wget "$binary_url" --quiet -O - | tar "$(tar_flags "$binary_url")" --strip-components=1 -C "$version" --occurrence=1 --wildcards '*bin/clang-format'
-		fi
-	fi
-	
-	if [ ! -d "$version.src" ]
-	then
-		echo "Downloading $version.src"
-		mkdir "$version.src"
-		wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
-		generate_default_options_list "$version" "$parser_awk"
-	fi
+    if [ ! -d "$version" ]; then
+        mkdir "$version"
+        if [ -f $binary_url ]; then
+                echo "Creating symlink $version"
+                mkdir -p "$version/bin"
+                ln -s "$binary_url" "$version/bin/clang-format"
+        else
+                echo "Downloading $version"
+                wget "$binary_url" --quiet -O - | tar "$(tar_flags "$binary_url")" --strip-components=1 -C "$version" --occurrence=1 --wildcards '*bin/clang-format'
+        fi
+    fi
+
+    if [ ! -d "$version.src" ]
+    then
+        echo "Downloading $version.src"
+        mkdir "$version.src"
+        wget "$source_url" --quiet -O - | tar "$(tar_flags "$source_url")" --strip-components=1 -C "$version.src" --occurrence=1 --wildcards '*/docs/ClangFormatStyleOptions.rst'
+        generate_default_options_list "$version" "$parser_awk"
+    fi
 done
 
 
