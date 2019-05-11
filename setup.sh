@@ -5,7 +5,7 @@ set -e
 useSystemBinaries=y
 # Use all online versions OR the list of mandatory versions
 useAllOnlineVersions=n
-mandatoryVersions="6.0.0 5.0.1 4.0.1 3.9.1 3.8.1"
+mandatoryVersions="8.0.0,7.0.0,6.0.0 5.0.1 4.0.1 3.9.1 3.8.1"
 buildHead=y
 
 echo "Options for this setup:"
