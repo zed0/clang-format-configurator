@@ -94,6 +94,11 @@ function generate_default_options_list {
     echo "}" >> "$jsFilename"
 }
 
+yaml_parser="$PWD/node_modules/js-yaml/bin/js-yaml.js"
+parser_awk="$PWD/parser.awk"
+
+pushd server/llvm
+
 #filling local list only if usage enabled
 local_versions=""
 if [[ $useSystemBinaries == [Yy] ]]; then
@@ -135,7 +140,12 @@ do
         continue
     fi
 
-    echo -n "$normal_version... "
+    if [ -d "$normal_version" ] && [ -d "$normal_version.src" ]; then
+        echo "Already installed $normal_version, skipping."
+        continue
+    fi
+
+    echo "$normal_version... "
 
     #adding online version if only not in local list
     if [ "${local_versions/$normal_version}" = "$local_versions" ]; then
@@ -143,11 +153,6 @@ do
         formatted_array+=" $normal_version,$(generate_source_url_from_version $normal_version),$(generate_binary_url_from_version $normal_version)"       
     fi
 done
-
-yaml_parser="$PWD/node_modules/js-yaml/bin/js-yaml.js"
-parser_awk="$PWD/parser.awk"
-
-pushd server/llvm
 
 for tuple in $formatted_array
 do
