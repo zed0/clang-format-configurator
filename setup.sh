@@ -225,3 +225,5 @@ if [[ $buildHead == [yY] ]]; then
 
     rm -rf "$temp_dir"
 fi
+
+echo "Done"
