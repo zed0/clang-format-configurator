@@ -144,9 +144,6 @@ do
     fi
 done
 
-echo "Doing npm install"
-npm install
-
 yaml_parser="$PWD/node_modules/js-yaml/bin/js-yaml.js"
 parser_awk="$PWD/parser.awk"
 
@@ -225,5 +222,8 @@ if [[ $buildHead == [yY] ]]; then
 
     rm -rf "$temp_dir"
 fi
+
+echo "Doing npm install"
+npm install
 
 echo "Done"
