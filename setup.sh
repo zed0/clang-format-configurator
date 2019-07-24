@@ -215,16 +215,17 @@ if [[ $buildHead == [yY] ]]; then
     cmake -G "Unix Makefiles" ..
     make clang-format -j "$(grep -c "^processor" /proc/cpuinfo)"
     popd
-    version="HEAD"
+    version="$("$temp_dir/build/bin/clang-format" --version | awk '{print $3 "+" substr($5, 0, 7)}')"
 
-    mkdir -p $version/bin
-    cp -f "$temp_dir/build/bin/clang-format" HEAD/bin
+    mkdir -p "$version/bin"
+    cp -f "$temp_dir/build/bin/clang-format" "$version/bin"
 
-    mkdir -p $version.src/docs
-    cp -f "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" HEAD.src/docs
+    mkdir -p "$version.src/docs"
+    cp -f "$temp_dir/tools/clang/docs/ClangFormatStyleOptions.rst" "$version.src/docs"
     generate_default_options_list "$version" "$parser_awk"
 
     rm -rf "$temp_dir"
+    echo "Installed HEAD as $version"
 fi
 
 echo "Doing npm install"
