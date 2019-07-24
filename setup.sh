@@ -112,15 +112,15 @@ if [[ $useSystemBinaries == [Yy] ]]; then
     local_versions=$(echo -e $local_versions)
 fi
 
-path="/tmp/clang.text"
-curl -o "$path" http://releases.llvm.org --compressed
-online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
-
-echo "Found versions on website:"
-echo "$online_versions" | column -c 50
-
 versionsToGenerate=""
 if [[ $useAllOnlineVersions == [Yy] ]]; then
+    path="/tmp/clang.text"
+    curl -o "$path" http://releases.llvm.org --compressed --silent
+    online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
+
+    echo "Found versions on website:"
+    echo "$online_versions" | column -c 50
+
     versionsToGenerate=$online_versions
 else
     versionsToGenerate=$mandatoryVersions
