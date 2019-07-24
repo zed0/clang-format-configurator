@@ -2,10 +2,10 @@
 set -e
 
 #Default options:
-useSystemBinaries=y
+useSystemBinaries=n
 # Use all online versions OR the list of mandatory versions
-useAllOnlineVersions=n
-mandatoryVersions="6.0.0 5.0.1 4.0.1 3.9.1 3.8.1"
+useAllOnlineVersions=y
+mandatoryVersions="7.0.0 6.0.0 5.0.1 4.0.1 3.5.2"
 buildHead=y
 
 echo "Options for this setup:"
