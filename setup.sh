@@ -42,7 +42,7 @@ done
 formatted_array=""
 
 function tar_flags {
-    echo "xv$(echo "$1" | sed '
+    echo "x$(echo "$1" | sed '
         /\.xz$/c\J
         /\.gz$/c\z
     ')"
