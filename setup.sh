@@ -64,7 +64,7 @@ function generate_binary_url_from_version {
     set +e
     for url in $template_urls
     do
-        wget -q --spider $url
+        wget -q --spider "$url"
         result=$?
         if [ $result -eq 0 ]; then
             echo "$url"
@@ -84,7 +84,7 @@ function generate_default_options_list {
     for style in $listOfBaseStyles
     do
         echo "\"${style}\" : " >> "$jsFilename"
-        ${version}/bin/clang-format -style=$style -dump-config > "${version}.src/docs/${style}.yaml"
+        "${version}/bin/clang-format" -style="$style" -dump-config > "${version}.src/docs/${style}.yaml"
         $yaml_parser "${version}.src/docs/${style}.yaml" >> "$jsFilename"
         echo "," >> "$jsFilename"
         rm -f "${version}.src/docs/${style}.yaml"
@@ -103,25 +103,24 @@ pushd server/llvm
 local_versions=""
 if [[ $useSystemBinaries == [Yy] ]]; then
     #get all installed binaries of clang-format and skip not existing directories warnings
-    clang_local_binaries=$(echo -n $(find {,/usr}/{,s}bin/clang-format{,-[0-9]*} 2>/dev/null))
+    clang_local_binaries=$(echo -n "$(find {,/usr}/{,s}bin/clang-format{,-[0-9]*} 2>/dev/null)")
     for clang_bin in $clang_local_binaries
     do
         version=$(${clang_bin} --version | sed 's/.*version \([^ -]*\).*/\1/')
         local_versions+="$version\n"
         #echo "Found local version: $version - ${clang_bin}"
-        formatted_array+=" ${version},$(generate_source_url_from_version ${version}),${clang_bin}"
+        formatted_array+=" ${version},$(generate_source_url_from_version "${version}"),${clang_bin}"
     done
 
     echo "Found local versions"
     echo -e "$local_versions" | column -c 50
-    local_versions=$(echo -e $local_versions)
+    local_versions=$(echo -e "$local_versions")
 fi
 
 versionsToGenerate=""
 if [[ $useAllOnlineVersions == [Yy] ]]; then
-    path="/tmp/clang.text"
-    curl -o "$path" http://releases.llvm.org --compressed --silent
-    online_versions=$(cat "$path" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
+    page_content=$(curl http://releases.llvm.org --compressed --silent)
+    online_versions=$(echo "$page_content" | grep -Po "['[0-9]+.*,\s+'[0-9\.]+']" | grep -Po "(([0-9]\.)+([0-9]))")
 
     echo "Found versions on website:"
     echo "$online_versions" | column -c 50
@@ -164,14 +163,14 @@ do
     binary_url=$3
     #Checking urls
     set +e
-    wget -q --spider $source_url
+    wget -q --spider "$source_url"
     result=$?
     if [ $result -ne 0 ]; then
         echo "Wrong source url for version $version. Skipping"
         continue
     fi
-    if [ ! -f $binary_url ]; then
-        wget -q --spider $binary_url
+    if [ ! -f "$binary_url" ]; then
+        wget -q --spider "$binary_url"
         result=$?
         if [ $result -ne 0 ]; then
             echo "Wrong binary url for version $version. Skipping"
@@ -183,7 +182,7 @@ do
 
     if [ ! -d "$version" ]; then
         mkdir "$version"
-        if [ -f $binary_url ]; then
+        if [ -f "$binary_url" ]; then
                 echo "Creating symlink $version"
                 mkdir -p "$version/bin"
                 ln -s "$binary_url" "$version/bin/clang-format"
@@ -210,7 +209,7 @@ if [[ $buildHead == [yY] ]]; then
     pushd "$temp_dir/tools"
     git clone --depth 1 http://llvm.org/git/clang.git clang
     popd
-    pushd $temp_dir
+    pushd "$temp_dir"
     mkdir build
     cd build
     cmake -G "Unix Makefiles" ..
