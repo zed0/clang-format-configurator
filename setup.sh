@@ -129,6 +129,14 @@ fi
 echo "Getting binary links"
 for normal_version in $versionsToGenerate
 do
+    min_version=3.5.2
+    if (echo -e "$normal_version\n$min_version" | sort -V -C); then
+        echo "Version $normal_version is too old to handle automatically, skipping."
+        continue
+    fi
+
+    echo -n "$normal_version... "
+
     #adding online version if only not in local list
     if [ "${local_versions/$normal_version}" = "$local_versions" ]; then
         # shellcheck disable=SC2086
