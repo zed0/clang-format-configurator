@@ -1,0 +1,12 @@
+[Unit]
+Description=Clang Format Configurator Server
+
+[Service]
+Type=simple
+ExecStart=%NPM_BINARY_PLACEHOLDER% start
+Restart=always
+WorkingDirectory=%WORKING_DIRECTORY_PLACEHOLDER%
+User=%USER_PLACEHOLDER%
+
+[Install]
+WantedBy=multi-user.target

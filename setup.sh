@@ -7,6 +7,7 @@ useSystemBinaries=n
 useAllOnlineVersions=y
 mandatoryVersions="7.0.0 6.0.0 5.0.1 4.0.1 3.5.2"
 buildHead=y
+installSystemdService=n
 
 echo "Options for this setup:"
 
@@ -27,6 +28,12 @@ if [[ $buildHead == [Yy] ]]; then
     echo "* Build HEAD version for server: YES"
 else 
     echo "* Build HEAD version for server: NO"
+fi
+
+if [[ $installSystemdService == [Yy] ]]; then
+    echo "* Install systemd service for server: YES"
+else
+    echo "* Install systemd service for server: NO"
 fi
 
 while true
@@ -228,7 +235,23 @@ if [[ $buildHead == [yY] ]]; then
     echo "Installed HEAD as $version"
 fi
 
+popd
+
 echo "Doing npm install"
 npm install
+
+if [[ $installSystemdService == [yY] ]]; then
+    install_dir=$(pwd)
+    npm_binary=$(which npm)
+    config_content=$(cat clang-format-configurator.service)
+    config_content="${config_content//%NPM_BINARY_PLACEHOLDER%/$npm_binary}"
+    config_content="${config_content//%WORKING_DIRECTORY_PLACEHOLDER%/$install_dir}"
+    config_content="${config_content//%USER_PLACEHOLDER%/$USER}"
+    echo "$config_content" | sudo tee /etc/systemd/system/clang-format-configurator.service > /dev/null
+    sudo chmod 644 /etc/systemd/system/clang-format-configurator.service
+    sudo systemctl enable clang-format-configurator
+    sudo systemctl restart clang-format-configurator
+    echo "Installed systemd service"
+fi
 
 echo "Done"
