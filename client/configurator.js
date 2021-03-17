@@ -87,7 +87,13 @@ function load_config(evt){
 			_.each(data, function(value, key){
 				var clang_option = clang_options[clang_version][key];
 				if(clang_option){
-					$('#' + key).val(value);
+					if (key == 'BraceWrapping') {
+						_.each(value, function(value, key) {
+							$(`#${key}`).prop('checked', value);
+						})
+					} else {
+						$('#' + key).val(value);
+					}
 				}
 				else
 				{
@@ -122,7 +128,16 @@ function save_config(clang_options, version){
 function get_config(options, version){
 	var result = {};
 	$.each(options[version], function(key, value){
-		var option_value = $('#' + key).val();
+		var option_value = {};
+		if (key == 'BraceWrapping') {
+			if ($('#BreakBeforeBraces').val() == 'Custom') {
+				$.each(value.options, function(key, value) {
+					option_value[value] = $(`#${value}`).is(':checked');
+				});
+			}
+		} else {
+			option_value = $(`#${key}`).val();
+		}
 		if(option_value && option_value !== 'Default')
 			result[key] = option_value;
 	});
@@ -154,7 +169,7 @@ function create_inputs(options){
 		$(input).appendTo(container);
 	});
 
-	$('.form-control').on('change', function(evt){
+	$('.form-control, .flags_input').on('change', function(evt){
 		request_update(clang_options, clang_version);
 	});
 
@@ -240,7 +255,7 @@ function flags_input(option_name, options){
 		'<fieldset>' +
 		'<legend><%= option_name %></legend>' +
 		'			<% _.forEach(options, function(option){%>' +
-		'           <input type="checkbox" value="<%= option %>" /><label for="cb1"><%= option %></label><br/>'+
+		'           <input type="checkbox" id="<%= option %>" class="flags_input" /><label for="cb1"><%= option %></label><br/>'+
 		'			<%});%>' +
 		'</ul>'+
 		'</fieldset>';
